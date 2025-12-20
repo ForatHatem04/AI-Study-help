@@ -10,6 +10,7 @@ from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
 from ai_study.extractors import extract_text_from_files
+from ai_study.llm import api_configured
 from ai_study.quiz import build_quiz_html, generate_mcqs
 from ai_study.summarizer import summarize_text
 
@@ -19,6 +20,8 @@ class StudyHelperGUI:
         self.root = root
         self.root.title("AI Study Helper")
         self.files: list[str] = []
+
+        self.using_api = api_configured()
 
         self._build_layout()
 
@@ -118,6 +121,15 @@ class StudyHelperGUI:
 
         ttk.Label(options, text="Save locations (Downloads by default)", background=surface_color).grid(
             row=2, column=0, columnspan=2, sticky=tk.W, pady=(10, 4)
+        )
+
+        api_notice = (
+            "OpenAI API key detected — using LLM for summaries and MCQs"
+            if self.using_api
+            else "No OpenAI API key found; falling back to local generation"
+        )
+        ttk.Label(options, text=api_notice, style="Muted.TLabel", background=surface_color).grid(
+            row=2, column=2, sticky=tk.E, padx=(0, 6), pady=(10, 4)
         )
 
         default_downloads = Path.home() / "Downloads"

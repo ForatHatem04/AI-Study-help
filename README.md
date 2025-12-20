@@ -1,6 +1,8 @@
 # AI Study Helper
 
-Generate concise summaries and multiple-choice quizzes (MCQs) from PDF, Word, and PowerPoint files.
+Generate concise summaries and multiple-choice quizzes (MCQs) from PDF, Word, and PowerPoint files. When an
+OpenAI API key is available, the app uses GPT-backed prompts for higher-quality summaries and questions; if not,
+it falls back to local heuristics.
 
 ## Features
 - Extract text from `.pdf`, `.docx/.doc`, and `.pptx/.ppt` files.
@@ -14,6 +16,10 @@ Generate concise summaries and multiple-choice quizzes (MCQs) from PDF, Word, an
    python -m venv .venv
    source .venv/bin/activate
    pip install -r requirements.txt
+   ```
+2. To enable LLM-powered generation, export your OpenAI key:
+   ```bash
+   export OPENAI_API_KEY="sk-..."
    ```
 
 ## Usage
@@ -39,8 +45,8 @@ Outputs:
 
 ## Project Structure
 - `ai_study/extractors.py`: Text extraction from supported document formats.
-- `ai_study/summarizer.py`: Frequency-based summarizer.
-- `ai_study/quiz.py`: MCQ generation and HTML quiz builder.
+- `ai_study/summarizer.py`: LLM-first summarizer with a frequency-based fallback.
+- `ai_study/quiz.py`: LLM-first MCQ generation with keyword-based fallback plus HTML quiz builder.
 - `main.py`: Command-line entry point tying everything together.
 
 ## Extending
