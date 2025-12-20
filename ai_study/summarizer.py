@@ -1,7 +1,9 @@
 import math
 import re
 from collections import Counter
-from typing import List
+from typing import List, Optional
+
+from .llm import summarize_with_llm
 
 STOPWORDS = {
     "the",
@@ -44,7 +46,7 @@ def tokenize(text: str) -> List[str]:
     return re.findall(r"[a-zA-Z']+", text.lower())
 
 
-def summarize_text(text: str, max_sentences: int = 5) -> str:
+def _summarize_locally(text: str, max_sentences: int) -> str:
     sentences = split_into_sentences(text)
     if not sentences:
         return ""
@@ -73,3 +75,12 @@ def summarize_text(text: str, max_sentences: int = 5) -> str:
     top_sentences = ranked_sentences[:max_sentences]
     ordered = [sentence for sentence in sentences if sentence in top_sentences]
     return " ".join(ordered)
+
+
+def summarize_text(text: str, max_sentences: int = 5) -> str:
+    """Summarize text with an LLM first, then fall back to extractive scoring."""
+
+    llm_summary: Optional[str] = summarize_with_llm(text, max_sentences=max_sentences)
+    if llm_summary:
+        return llm_summary.strip()
+    return _summarize_locally(text, max_sentences)

@@ -3,6 +3,7 @@ import random
 from dataclasses import dataclass
 from typing import List, Sequence
 
+from .llm import mcqs_with_llm
 from .summarizer import STOPWORDS, split_into_sentences, tokenize
 
 
@@ -36,7 +37,7 @@ def _pick_distractors(answer: str, keywords: Sequence[str], count: int = 3) -> L
     return result
 
 
-def generate_mcqs(text: str, amount: int = 5) -> List[Question]:
+def _generate_mcqs_locally(text: str, amount: int = 5) -> List[Question]:
     sentences = split_into_sentences(text)
     keywords = _keyword_candidates(text)
     if not sentences or not keywords:
@@ -75,6 +76,28 @@ def generate_mcqs(text: str, amount: int = 5) -> List[Question]:
         questions.append(Question(prompt=prompt, options=options, answer_index=answer_index))
 
     return questions[:amount]
+
+
+def generate_mcqs(text: str, amount: int = 5) -> List[Question]:
+    """Generate MCQs using an LLM first, then fall back to keyword heuristics."""
+
+    llm_result = mcqs_with_llm(text, amount=amount)
+    if llm_result:
+        questions: List[Question] = []
+        for item in llm_result:
+            try:
+                prompt = str(item["prompt"]).strip()
+                options = [str(opt) for opt in item.get("options", []) if str(opt).strip()]
+                answer_index = int(item.get("answer_index", 0))
+            except Exception:
+                continue
+            if not prompt or not options or not 0 <= answer_index < len(options):
+                continue
+            questions.append(Question(prompt=prompt, options=options, answer_index=answer_index))
+        if questions:
+            return questions[:amount]
+
+    return _generate_mcqs_locally(text, amount)
 
 
 def build_quiz_html(questions: List[Question], summary: str, output_path: str) -> str:
