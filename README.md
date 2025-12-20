@@ -19,14 +19,13 @@ Generate concise summaries and multiple-choice quizzes (MCQs) from PDF, Word, an
 ## Usage
 ### GUI (no terminal required)
 Run the GUI helper and use the buttons to pick documents and choose where to save
-the outputs (they default to your **Downloads** folder):
+the outputs:
 ```bash
 python gui.py
 ```
 
-The window shows your selected files, lets you request detailed 20+ sentence
-summaries, configure up to 50 MCQs, and writes the results to the chosen text
-and HTML files (defaulting to Downloads for convenience).
+The window shows your selected files, lets you set how many summary sentences and
+questions to generate, and writes the results to the chosen text and HTML files.
 ### Command line
 Run the CLI with one or more documents:
 ```bash
