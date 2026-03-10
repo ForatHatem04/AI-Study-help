@@ -1,54 +1,42 @@
-# AI Study Helper
+# vqls library
 
-Generate concise summaries and multiple-choice quizzes (MCQs) from PDF, Word, and PowerPoint files. When an
-OpenAI API key is available, the app uses GPT-backed prompts for higher-quality summaries and questions; if not,
-it falls back to local heuristics.
+`vqls library` is a clean restart of this repository focused on a Variational Quantum Linear Solver (VQLS) implementation that targets modern Qiskit APIs (Qiskit `>=2.0.0`).
 
-## Features
-- Extract text from `.pdf`, `.docx/.doc`, and `.pptx/.ppt` files.
-- Summarize the content into a configurable number of sentences.
-- Generate MCQs and an interactive HTML quiz.
-- Save summary to a text file and quiz to a standalone HTML page.
+## What changed
 
-## Setup
-1. Create a virtual environment (recommended) and install dependencies:
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate
-   pip install -r requirements.txt
-   ```
-2. To enable LLM-powered generation, export your OpenAI key:
-   ```bash
-   export OPENAI_API_KEY="sk-..."
-   ```
+- Repository content was reset and rebuilt around a dedicated VQLS package.
+- The implementation avoids deprecated `QuantumInstance`/legacy algorithm glue and uses Qiskit's modern primitives path.
+- Imports are explicit and defensive so the package can still be imported in environments where Qiskit is not installed.
 
-## Usage
-### GUI (no terminal required)
-Run the GUI helper and use the buttons to pick documents and choose where to save
-the outputs (they default to your **Downloads** folder):
+## Install
+
 ```bash
-python gui.py
+pip install -e .
 ```
 
-The window shows your selected files, lets you request detailed 24–80 sentence
-summaries (default 30), configure up to 50 MCQs, and writes the results to the
-chosen text and HTML files (defaulting to Downloads for convenience).
-### Command line
-Run the CLI with one or more documents:
+Optional runtime dependencies for actually running the quantum solver:
+
 ```bash
-python main.py path/to/file1.pdf path/to/file2.docx --summary-length 4 --questions 6 --html-output quiz.html --summary-output summary.txt
+pip install "qiskit>=2.0.0" scipy numpy
 ```
 
-Outputs:
-- `summary.txt` contains the generated summary.
-- `quiz.html` contains the interactive quiz; open it in a browser to practice.
+## Quick start
 
-## Project Structure
-- `ai_study/extractors.py`: Text extraction from supported document formats.
-- `ai_study/summarizer.py`: LLM-first summarizer with a frequency-based fallback.
-- `ai_study/quiz.py`: LLM-first MCQ generation with keyword-based fallback plus HTML quiz builder.
-- `main.py`: Command-line entry point tying everything together.
+```python
+import numpy as np
+from vqls_library import VQLSProblem, VQLSSolver
 
-## Extending
-- Adjust `STOPWORDS` in `summarizer.py` to fine-tune keyword emphasis.
-- Enhance `generate_mcqs` in `quiz.py` with advanced NLP if desired.
+A = np.array([[1.0, 0.2], [0.2, 1.0]], dtype=float)
+b = np.array([1.0, 0.0], dtype=float)
+
+problem = VQLSProblem.from_matrix(A, b)
+solver = VQLSSolver(problem, reps=2, seed=7)
+result = solver.solve(maxiter=50)
+
+print(result.cost, result.parameters)
+```
+
+## Notes
+
+- The provided cost function is a compact, maintainable baseline for VQLS-style workflows rather than a full research-optimized implementation.
+- For hardware runs, replace default statevector primitives with provider-backed primitives while keeping the same solver API.
