@@ -1,4 +1,0 @@
-pdfplumber
-python-docx
-python-pptx
-openai>=1.30.0
